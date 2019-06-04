@@ -2,7 +2,7 @@
 ## Grammaire appliquée à la datavisualisation
 ####  Mise en oeuvre du FT Visual Vocab avec Vega-Lite
 
-
+![Poster Visual Vocab](https://raw.githubusercontent.com/ft-interactive/chart-doctor/master/visual-vocabulary/poster.png)
 
 
 Ressources :
