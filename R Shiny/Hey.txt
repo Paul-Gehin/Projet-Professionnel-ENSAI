@@ -1,1 +1,0 @@
-Je met un fichier texte dans le dossier R shiny pour qu'il apparaisse dans git. ce fichier ne sert à rien d'autre et pourra etre supprimé quand l'application R shiny sera créée
