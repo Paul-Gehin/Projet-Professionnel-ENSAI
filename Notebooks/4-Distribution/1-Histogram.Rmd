@@ -1,18 +1,74 @@
 ---
 title: "R Notebook"
 output: html_notebook
+runtime: shiny
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+# Histogramme
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+La représentation standard d'une distribution statistique.
+Pensez à garder un faible écart entre les colonnes pour conserver la "forme" de la distribution.
 
-```{r}
-plot(cars)
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(XML) # Permet de parser les fichiers XML
+require(httr) # Permet de faire des requetes http
+require(vegalite) # Permet d'utiliser Vega-Lite
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+On commence par définir ce que l'on souhaite afficher
+```{r echo=TRUE}
+# Où sont les données ?
+URL <- "https://www.insee.fr/fr/statistiques/fichier/1892086/pop-totale-france.xls"
+# Titre de l'axe des abscisses
+X <- "Âge révolu"
+# Titre de l'axe des ordonnées
+Y <- "Total de personnes"
+# Information auxiliaire sous forme de texte
+description <- "Un simple histogramme"
+# Précision de l'histogramme
+nombre_bins <- 20
+```
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+On peut ensuite aller chercher les données.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+GET(URL, write_disk(tf <- tempfile(fileext = ".html")))
+donnees <- readHTMLTable(tf,
+                         which = 1,
+                         header = TRUE,
+                         skip.rows = c(1, 2, 3, 4, 5, 107,108, 109),
+                         encoding="UTF-8",
+                         stringsAsFactors = FALSE,
+                         colClasses = c("character", "integer", "character", "character", "character", "character"))
+```
+
+On les transforment un peu pour les rendre compatible avec Vega-Lite.
+```{r echo=TRUE}
+donnees_finales <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`)
+```
+
+
+On construit ensuite l'objet vegalite ...
+```{r echo=TRUE}
+vl <- vegalite(description = description, viewport_width=400, viewport_height=400) %>%
+  add_data(donnees_finales) %>%
+  encode_x("Age_revolu", type = "quantitative") %>%
+  encode_y("Ensemble", type = "quantitative", aggregate = "sum") %>%
+  bin_x(maxbins = nombre_bins) %>%
+  axis_x(title = X) %>%
+  axis_y(title = Y) %>%
+  mark_bar()
+```
+
+
+... et on peut afficher le graphique ...
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+vl
+```
+
+... ou obtenir le schéma JSON correspondant.
+
+```{r echo=TRUE}
+to_spec(vl)
+```
