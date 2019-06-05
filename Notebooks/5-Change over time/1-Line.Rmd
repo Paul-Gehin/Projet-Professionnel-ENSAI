@@ -1,18 +1,60 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Line plot"
+output:
+  html_document:
+    df_print: paged
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+Nous allons utiliser la librairie vegalite pour créer un line plot à partir d'un jeu de données.
 
 ```{r}
-plot(cars)
+library(vegalite)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+###Sur des données simulées
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+data_simulees <- jsonlite::fromJSON('[
+      {"annee": "2010","y": 28}, {"annee": "2011","y": 55}, {"annee": "2018","y": 43},
+      {"annee": "2005","y": 91}, {"annee": "2007","y": 40}, {"annee": "2015","y": 53},
+      {"annee": "2016","y": 19}, {"annee": "2012","y": 87}, {"annee": "2008","y": 75}
+    ]')
+```
+On obtient :
+
+```{r}
+vegalite() %>%
+  cell_size(300,350) %>%                    #Taille (x,y) du plot en sortie
+  add_data(data_simulees) %>%               #Définition du jeu de données
+  encode_x("annee", "temporal") %>%         #Définition de la variable sur l'axe des x
+  axis_x(title="Année") %>%                 #Label de l'axe des x
+  encode_y("y", "quantitative") %>%         #Définition de la variable sur l'axe des y
+  axis_y(title="Pourcentage de ...")%>%     #Label de l'axe des y
+  mark_line(color = "black")                #Définition du type de plot (ici un "Line plot", en noir)
+  
+```
+
+###Sur des données réelles
+
+Les données que nous utilisons ici représentent les quantités journalières provisoires injectées de biométhane, agrégées à la maille France, toute unité confondue.
+
+Pour plus d'information :
+https://www.data.gouv.fr/es/datasets/quantites-journalieres-provisoires-injectees-de-biomethane-agregees-a-la-maille-france-toute-unite-confondue/
+
+```{r}
+data_reelles <- jsonlite::fromJSON("https://www.data.gouv.fr/es/datasets/r/0cb7962b-1358-488f-a433-8d452d8d6257")
+```
+
+Les données qui nous intéressent sont stockés dans la variable "fields" de data_reelles. On ne prendra donc que cette partie là dans l'appel de vegalite. On obtient :
+
+```{r}
+vegalite() %>%
+  cell_size(400,350) %>%                                #Taille (x,y) du plot en sortie
+  add_data(data_reelles$fields) %>%                     #Définition du jeu de données
+  encode_x("journee_gaziere", "temporal") %>%           #Définition de la variable sur l'axe des x
+  axis_x(title="Journée gazière") %>%                   #Label de l'axe des x
+  encode_y("quantite_injectee", "quantitative") %>%     #Définition de la variable sur l'axe des y
+  axis_y(title="Quantité injectée en MWh")%>%           #Label de l'axe des y
+  mark_line(color = "green")                            #Définition du type de plot (ici un "Line plot", en vert)
+```
