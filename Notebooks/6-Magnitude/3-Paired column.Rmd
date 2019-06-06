@@ -1,18 +1,69 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Paired column"
+output: html_document
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+# Paired column
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
-```{r}
-plot(cars)
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(vegalite)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+Jeu de données :
+```{r}
+data <- jsonlite::fromJSON('[
+      {"csp": "Employés","region": "1", "taux" : 27.08},
+      {"csp": "Employés","region": "2", "taux" : 26.16},
+      {"csp": "Ouvriers","region": "1", "taux" : 22.22},
+      {"csp": "Ouvriers","region": "2", "taux" : 19.83},
+      {"csp": "Professions intermédiaires","region": "1", "taux" : 17.59},
+      {"csp": "Professions intermédiaires","region": "2", "taux" : 17.69},
+      {"csp": "Artisans, commerçants et chefs d’entreprise","region": "1", "taux" : 17.32},
+      {"csp": "Artisans, commerçants et chefs d’entreprise","region": "2", "taux" : 16.67},
+      {"csp": "Cadres et professions intellectuelles supérieures","region": "1", "taux" : 11.52},
+      {"csp": "Cadres et professions intellectuelles supérieures","region": "2", "taux" : 15.15},
+      {"csp": "Agriculteurs exploitants","region": "1", "taux" : 4.27},
+      {"csp": "Agriculteurs exploitants","region": "2", "taux" : 4.5}
+      
+    ]')
+```
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+
+test <- jsonlite::fromJSON("https://vega.github.io/vega-editor/app/data/population.json")
+
+vegalite() %>%
+  add_data(test) %>%
+  add_filter("datum.year == 2000") %>%
+  calculate("gender", 'datum.sex == 2 ? "Female" : "Male"') %>%
+  encode_x("gender", "nominal") %>%
+  encode_y("people", "quantitative", aggregate="sum") %>%
+  encode_color("gender", "nominal") %>%
+  scale_x_ordinal(band_size=6) %>%
+  scale_color_nominal(range=c("#EA98D2", "#659CCA")) %>%
+  facet_col("age", "ordinal", padding=4) %>%
+  axis_x(remove=TRUE) %>%
+  axis_y(title="population", grid=FALSE) %>%
+  axis_facet_col(orient="bottom", axisWidth=1, offset=-8) %>%
+  facet_cell(stroke_width=0) %>%
+  mark_bar()
+```
+
+```{r}
+vegalite(viewport_width=600) %>%
+  add_data(data) %>%
+  calculate("region2", expr = 'datum.region == 2 ? "France" : "Bourgogne-Franche-Comté"') %>%
+  encode_x("region2", "nominal") %>%         
+  encode_y("taux", "quantitative") %>%  
+  encode_color("region2", "nominal") %>%
+  scale_x_ordinal(band_size = 20) %>%
+  scale_color_nominal(range = c("#EA98D2", "#659CCA")) %>%
+  facet_col("csp", "ordinal", padding = 90) %>%
+  axis_x(remove = TRUE) %>%
+  axis_y(title = "Part (en %)", grid = FALSE) %>%
+  axis_facet_col(orient = "bottom", axisWidth = 1, offset = -8) %>%
+  facet_cell(stroke_width = 0) %>%
+  mark_bar()                               
+```

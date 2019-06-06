@@ -29,6 +29,7 @@ vegalite() %>%
   add_data(data_simulees) %>%               #Définition du jeu de données
   encode_x("annee", "temporal") %>%         #Définition de la variable sur l'axe des x
   axis_x(title="Année") %>%                 #Label de l'axe des x
+  timeunit_x(unit = "year") %>%
   encode_y("y", "quantitative") %>%         #Définition de la variable sur l'axe des y
   axis_y(title="Pourcentage de ...")%>%     #Label de l'axe des y
   mark_line(color = "black")                #Définition du type de plot (ici un "Line plot", en noir)
