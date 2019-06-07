@@ -1,10 +1,8 @@
 ---
-title: "R Notebook"
+title: "Histogramme"
 output: html_notebook
 runtime: shiny
 ---
-
-# Histogramme
 
 La représentation standard d'une distribution statistique.
 Pensez à garder un faible écart entre les colonnes pour conserver la "forme" de la distribution.
