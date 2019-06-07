@@ -1,18 +1,17 @@
 ---
 title: "Line plot"
-output:
-  html_document:
-    df_print: paged
+output: html_notebook
+runtime : shiny
 ---
 
-Nous allons utiliser la librairie vegalite pour créer un line plot à partir d'un jeu de données.
+Nous allons utiliser la librairie altair pour crÃ©er un line plot Ã  partir d'un jeu de donnÃ©es.
 
 ```{r}
-library(vegalite)
+library(altair)
 ```
 
 
-###Sur des données simulées
+###Sur des donnÃ©es simulÃ©es
 
 ```{r}
 data_simulees <- jsonlite::fromJSON('[
@@ -24,21 +23,17 @@ data_simulees <- jsonlite::fromJSON('[
 On obtient :
 
 ```{r}
-vegalite() %>%
-  cell_size(300,350) %>%                    #Taille (x,y) du plot en sortie
-  add_data(data_simulees) %>%               #Définition du jeu de données
-  encode_x("annee", "temporal") %>%         #Définition de la variable sur l'axe des x
-  axis_x(title="Année") %>%                 #Label de l'axe des x
-  timeunit_x(unit = "year") %>%
-  encode_y("y", "quantitative") %>%         #Définition de la variable sur l'axe des y
-  axis_y(title="Pourcentage de ...")%>%     #Label de l'axe des y
-  mark_line(color = "black")                #Définition du type de plot (ici un "Line plot", en noir)
-  
+alt$Chart(data_simulees)$
+  encode(
+    x = "annee:T",
+    y = "y:Q"
+    )$
+  mark_line(color = 'black')
 ```
 
-###Sur des données réelles
+###Sur des donnÃ©es rÃ©elles
 
-Les données que nous utilisons ici représentent les quantités journalières provisoires injectées de biométhane, agrégées à la maille France, toute unité confondue.
+Les donnÃ©es que nous utilisons ici reprÃ©sentent les quantitÃ©s journaliÃ¨res provisoires injectÃ©es de biomÃ©thane, agrÃ©gÃ©es Ã  la maille France, toute unitÃ© confondue.
 
 Pour plus d'information :
 https://www.data.gouv.fr/es/datasets/quantites-journalieres-provisoires-injectees-de-biomethane-agregees-a-la-maille-france-toute-unite-confondue/
@@ -47,15 +42,15 @@ https://www.data.gouv.fr/es/datasets/quantites-journalieres-provisoires-injectee
 data_reelles <- jsonlite::fromJSON("https://www.data.gouv.fr/es/datasets/r/0cb7962b-1358-488f-a433-8d452d8d6257")
 ```
 
-Les données qui nous intéressent sont stockés dans la variable "fields" de data_reelles. On ne prendra donc que cette partie là dans l'appel de vegalite. On obtient :
+Les donnÃ©es qui nous intÃ©ressent sont stockÃ©es dans la variable "fields" de data_reelles. On ne prendra donc que cette partie lÃ  pour rÃ©aliser le graphique. On obtient :
 
 ```{r}
-vegalite() %>%
-  cell_size(400,350) %>%                                #Taille (x,y) du plot en sortie
-  add_data(data_reelles$fields) %>%                     #Définition du jeu de données
-  encode_x("journee_gaziere", "temporal") %>%           #Définition de la variable sur l'axe des x
-  axis_x(title="Journée gazière") %>%                   #Label de l'axe des x
-  encode_y("quantite_injectee", "quantitative") %>%     #Définition de la variable sur l'axe des y
-  axis_y(title="Quantité injectée en MWh")%>%           #Label de l'axe des y
-  mark_line(color = "green")                            #Définition du type de plot (ici un "Line plot", en vert)
+alt$Chart(data_reelles$fields)$
+  encode(
+    x = "journee_gaziere:T",
+    y = "quantite_injectee:Q"
+  )$
+  mark_line(color = 'green')$
+  properties(
+    title = "QuantitÃ©s journaliÃ¨res provisoires injectÃ©es de biomÃ©thane, agrÃ©gÃ©es Ã  la maille France, toute unitÃ© confondue.")
 ```
