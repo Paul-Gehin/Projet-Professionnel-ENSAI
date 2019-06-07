@@ -13,7 +13,8 @@ Pensez à garder un faible écart entre les colonnes pour conserver la "forme" d
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 require(XML) # Permet de parser les fichiers XML
 require(httr) # Permet de faire des requetes http
-require(vegalite) # Permet d'utiliser Vega-Lite
+require(altair) # Permet d'utiliser Vega-Lite
+#install_altair(pip = T)
 ```
 
 On commence par définir ce que l'on souhaite afficher
@@ -51,14 +52,19 @@ donnees_finales <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemb
 
 On construit ensuite l'objet vegalite ...
 ```{r echo=TRUE}
-vl <- vegalite(description = description, viewport_width=400, viewport_height=400) %>%
-  add_data(donnees_finales) %>%
-  encode_x("Age_revolu", type = "quantitative") %>%
-  encode_y("Ensemble", type = "quantitative", aggregate = "sum") %>%
-  bin_x(maxbins = nombre_bins) %>%
-  axis_x(title = X) %>%
-  axis_y(title = Y) %>%
-  mark_bar()
+vl <- alt$
+        Chart(donnees_finales)$
+        mark_bar()$
+        encode(
+                alt$X("Age_revolu:Q",
+                        bin = alt$Bin(maxbins = nombre_bins),
+                        axis = alt$Axis(title = X)),
+                y = alt$Y('sum(Ensemble):Q',
+                          axis = alt$Axis(title = Y))
+        )$
+        properties(
+          title = description
+        )
 ```
 
 
@@ -70,5 +76,5 @@ vl
 ... ou obtenir le schéma JSON correspondant.
 
 ```{r echo=TRUE}
-to_spec(vl)
+vl$to_json()
 ```
