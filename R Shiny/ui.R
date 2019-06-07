@@ -60,7 +60,19 @@ shinyUI(fluidPage(
         tabPanel("Distribution",
                  navlistPanel(
                      tabPanel("Histogram",
-                              NULL),
+                              sidebarLayout(
+                                  mainPanel(
+                                      htmlOutput("Histogram")
+                                      ),
+                                  sidebarPanel(
+                                      sliderInput("nombre_bins",
+                                                  label = "Nombre de bins",
+                                                  min = 2,
+                                                  max = 100,
+                                                  value = 20,
+                                                  step = 1)
+                                  )
+                              )),
                      tabPanel("Dot Plot",
                               NULL),
                      tabPanel("Dot Strip Plot",
