@@ -1,18 +1,64 @@
 ---
-title: "R Notebook"
+title: "Scatterplot"
 output: html_notebook
+runtime: shiny
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+La représentation standard de la relation entre deux variables continues, chacune représentée par un axe. 
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
-```{r}
-plot(cars)
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(xlsx) # Permet de lire des fichier xls
+require(httr) # Permet de faire des requêtes http
+require(altair) # Permet d'utiliser Vega-Lite
+#install_altair(pip = T)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+On importe les données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+# Depuis le site de l'insee
+URL="https://insee.fr/fr/statistiques/fichier/2521169/base_cc_comparateur.zip"
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+#on les télecharge et on les dézip
+temp <- tempfile()
+download.file(URL,temp)
+xls<-unzip(temp, "base_cc_comparateur.xls")
+unlink(temp)
+
+#on sélectionne les variables qui nous intéressent (ici les 10 premières)
+c1<-c("character",  "character", "character", "character","integer","integer" ,"integer" ,"integer" ,"integer" ,"integer"  )
+c2<-rep("NULL",26)
+col <- c(c1,c2)
+
+data<-read.xlsx2(xls, 1,startRow = 6, header=TRUE, colClasses=col)
+```
+
+
+On construit ensuite l'objet vegalite ...
+```{r echo=TRUE}
+scatterplot <- 
+  alt$Chart(data)$
+  mark_point()$
+  encode(
+    x = alt$X('DECE1015:Q', axis=alt$Axis(title="Décès entre 2010 et 2015")),
+    y = alt$Y('NAIS1015:Q', axis=alt$Axis(title="Naissances entre 2010 et 2015")),
+    color = alt$Color('REG:N', legend=alt$Legend(title="Régions")),
+    tooltip = c("LIBGEO","DECE1015", "NAIS1015", "REG")
+    )$
+  properties(
+    title = "Scatterplot"
+  )#$interactive()
+  
+#NB : Sur altair (python), il existe une limite d'observations (5000 max). Je ne sais pas si elle s'applique aussi en R, je n'aipas pu tester le graphique. 
+```
+
+
+On affiche le graphique
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+scatterplot
+```
+
+On obtient le schéma JSON correspondant.
+```{r echo=TRUE}
+scatterplot$to_json()
+```
