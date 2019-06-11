@@ -13,24 +13,8 @@ require(httr) # Permet de faire des requetes http
 require(altair) # Permet d'utiliser Vega-Lite
 
 # Fetch data for Histogram
-# Où sont les données ?
-URL <- "https://www.insee.fr/fr/statistiques/fichier/1892086/pop-totale-france.xls"
-# Titre de l'axe des abscisses
-X <- "Âge révolu"
-# Titre de l'axe des ordonnées
-Y <- "Total de personnes"
-# Information auxiliaire sous forme de texte
-description <- "Un simple histogramme"
-# Précision de l'histogramme
-GET(URL, write_disk(tf <- tempfile(fileext = ".html")))
-donnees <- readHTMLTable(tf,
-                         which = 1,
-                         header = TRUE,
-                         skip.rows = c(1, 2, 3, 4, 5, 107,108, 109),
-                         encoding="UTF-8",
-                         stringsAsFactors = FALSE,
-                         colClasses = c("character", "integer", "character", "character", "character", "character"))
-donnees_finales <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`)
+path_dossier_projet <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
+load(paste(path_dossier_projet,"/Data/Histogram.Rdata", sep = ""))
 
 
 # Define server logic required to draw a histogram
@@ -38,20 +22,20 @@ shinyServer(function(input, output) {
 
     output$Histogram <- renderUI({
         vl <- alt$
-            Chart(donnees_finales)$
+            Chart(donnees_histogramme)$
             mark_bar()$
             encode(
                 alt$X("Age_revolu:Q",
-                      bin = alt$Bin(maxbins = input$nombre_bins),
-                      axis = alt$Axis(title = X)),
+                      bin = alt$Bin(maxbins = input$nombre_bins_histogramme),
+                      axis = alt$Axis(title = "Âge révolu")),
                 y = alt$Y('sum(Ensemble):Q',
-                          axis = alt$Axis(title = Y))
+                          axis = alt$Axis(title = "Total de personnes"))
             )$
             properties(
-                title = description
+                title = input$titre_histogramme
             )
 
-        HTML(vegawidget::vw_to_svg(vl))
+        HTML(vegawidget::vw_to_svg(vegawidget(vl, embed = vega_embed(renderer = "svg"))))
         
     })
 })

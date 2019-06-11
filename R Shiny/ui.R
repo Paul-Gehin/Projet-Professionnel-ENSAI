@@ -62,10 +62,17 @@ shinyUI(fluidPage(
                      tabPanel("Histogram",
                               sidebarLayout(
                                   mainPanel(
-                                      htmlOutput("Histogram")
-                                      ),
+                                      verticalLayout(
+                                          p("La représentation standard d'une distribution statistique."),
+                                          p("Pensez à garder un faible écart entre les colonnes pour conserver la \"forme\" de la distribution."),
+                                          htmlOutput("Histogram")
+                                      )
+                                  ),
                                   sidebarPanel(
-                                      sliderInput("nombre_bins",
+                                      textInput(inputId = "titre_histogramme",
+                                                label = "Titre",
+                                                value = "Un simple histogramme"),
+                                      sliderInput(inputId = "nombre_bins_histogramme",
                                                   label = "Nombre de bins",
                                                   min = 2,
                                                   max = 100,
