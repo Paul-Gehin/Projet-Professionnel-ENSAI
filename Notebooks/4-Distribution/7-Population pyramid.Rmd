@@ -1,18 +1,107 @@
 ---
-title: "R Notebook"
+title: "Population pyramid"
 output: html_notebook
+runtime: shiny
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+La représentation standard d'une distribution statistique.
+Pensez à garder un faible écart entre les colonnes pour conserver la "forme" de la distribution.
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
-```{r}
-plot(cars)
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(XML) # Permet de parser les fichiers XML
+require(httr) # Permet de faire des requetes http
+require(altair) # Permet d'utiliser Vega-Lite
+#install_altair(pip = T)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+On importe les données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+URL <- "https://www.insee.fr/fr/statistiques/fichier/1892086/pop-totale-france.xls"
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+#On télécharge le fichier
+GET(URL, write_disk(tf <- tempfile(fileext = ".html")))
+donnees <- readHTMLTable(tf, which = 1,
+                         header = TRUE,
+                         skip.rows = c(1, 2, 3, 4, 5, 107,108, 109),
+                         encoding="UTF-8",
+                         stringsAsFactors = FALSE,
+                         colClasses = c("character", "integer", "character", "character", "character", "character"))
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+#On sélectionne les variables
+donnees_inter <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`,nb_femmes=as.integer(gsub(" ", "", donnees$`Nombre de femmes`, fixed = TRUE)),nb_hommes=as.integer(gsub(" ", "", donnees$`Nombre d'hommes`, fixed = TRUE)))
+
+#On agrège les données pour obtenir des tranches d'âge de 10 ans
+fem=rep(0,10)
+hom=rep(0,10)
+age=c('0-10','10-20','20-30','30-40','40-50','50-60','60-70','70-80','80-90','90+')
+
+f=0
+h=0
+
+c=1
+
+for( i in seq(length(donnees_inter[,1]))){
+  f<-f+as.integer(donnees_inter[i,3])
+  h<-h+as.integer(donnees_inter[i,4])
+  if (donnees_inter[i,2]%%10==0){
+    if (donnees_inter[i,2] != 0){
+      fem[c]<-f
+      hom[c]<-h
+      c<-c+1
+      f<-0
+      h<-0
+    }
+  }
+}
+
+donnees_finales<-data.frame(Age=age,Femmes=fem,Hommes=hom)
+
+```
+
+
+On construit ensuite l'objet vegalite ...
+```{r echo=TRUE}
+
+#D'abord la partie de gauche ...
+
+left <-alt$Chart(donnees_finales)$encode(
+  y=alt$Y('Age:N', axis=None),
+  x=alt$X('Femmes:Q',
+          title='population',
+          sort=alt$SortOrder('descending')),
+          tooltip=c("Age","Femmes")
+)$mark_bar()$properties(title='Femmes')
+
+# ... puis la partie du centre ...
+
+middle <- alt$Chart(donnees_finales)$encode(
+  y=alt$Y('Age:N', axis=None,
+          sort=alt$SortOrder('descending')),
+  text=alt$Text('Age:N'),
+)$mark_text()$properties(width=50)
+
+#... et enfin la partie de droite.
+
+right <- alt$Chart(donnees_finales)$encode(
+  y=alt$Y('Age:N', axis=None),
+  x=alt.X('Hommes:Q', title='population'),
+  tooltip=c("Age","Hommes")
+)$mark_bar()$properties(title='Hommes')
+
+#On assemble les trois parties
+
+pyramid<- alt$concat(left, middle, right, spacing=5)
+```
+
+
+... et on peut afficher le graphique ...
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+pyramid
+```
+
+... ou obtenir le schéma JSON correspondant.
+
+```{r echo=TRUE}
+pyramid$to_json()
+```
