@@ -102,7 +102,22 @@ shinyUI(fluidPage(
         tabPanel("Change over time",
                  navlistPanel(
                      tabPanel("Line",
-                              NULL),
+                              sidebarLayout(
+                                  mainPanel(
+                                      p("La représentation standard de séries changeant au cours du temps."),
+                                      p("Si les données sont irrégulières, vous pouvez considérer d'utiliser des marqueurs pour représenter les points des données."),
+                                      htmlOutput("Line")
+                                  ),
+                                  sidebarPanel(
+                                      textInput(inputId = "titre_line",
+                                                label = "Titre",
+                                                value = "Quantités journalières provisoires injectées de biométhane, agrégées à la maille France, toute unité confondue."),
+                                      selectInput("color_line", "Couleur :",
+                                                  c("Vert" = "green",
+                                                    "Rouge" = "red",
+                                                    "Bleue" = "blue"))
+                                  )
+                              )),
                      tabPanel("Column",
                               NULL),
                      tabPanel("Column + line timeline",

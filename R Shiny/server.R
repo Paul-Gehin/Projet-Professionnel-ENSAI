@@ -16,10 +16,12 @@ require(altair) # Permet d'utiliser Vega-Lite
 path_dossier_projet <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
 load(paste(path_dossier_projet,"/Data/Histogram.Rdata", sep = ""))
 
+# Fetch data for Line
+donnees_line <- jsonlite::fromJSON("https://www.data.gouv.fr/es/datasets/r/0cb7962b-1358-488f-a433-8d452d8d6257")$fields
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-
+    
     output$Histogram <- renderUI({
         vl <- alt$
             Chart(donnees_histogramme)$
@@ -35,6 +37,20 @@ shinyServer(function(input, output) {
                 title = input$titre_histogramme
             )
 
+        HTML(vegawidget::vw_to_svg(vegawidget(vl, embed = vega_embed(renderer = "svg"))))
+        
+    })
+    
+    output$Line <- renderUI({
+        vl <- alt$Chart(donnees_line)$
+            encode(
+                x = "journee_gaziere:T",
+                y = "quantite_injectee:Q"
+            )$
+            mark_line(color = input$color_line)$
+            properties(
+                title = input$titre_line)
+        
         HTML(vegawidget::vw_to_svg(vegawidget(vl, embed = vega_embed(renderer = "svg"))))
         
     })
