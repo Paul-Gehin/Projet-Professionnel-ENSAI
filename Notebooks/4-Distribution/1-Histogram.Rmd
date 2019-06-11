@@ -44,14 +44,19 @@ donnees <- readHTMLTable(tf,
 
 On les transforment un peu pour les rendre compatible avec Vega-Lite.
 ```{r echo=TRUE}
-donnees_finales <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`)
+donnees_histogramme <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`)
 ```
 
+On les sauvegarde pour utilisation ultérieure.
+```{r echo=TRUE}
+filename <- paste(dirname(dirname(dirname(rstudioapi::getSourceEditorContext()$path))),"/Data/Histogram.Rdata", sep = "")
+save(donnees_histogramme, file = filename)
+```
 
 On construit ensuite l'objet vegalite ...
 ```{r echo=TRUE}
 vl <- alt$
-        Chart(donnees_finales)$
+        Chart(donnees_histogramme)$
         mark_bar()$
         encode(
                 alt$X("Age_revolu:Q",
