@@ -1,69 +1,79 @@
 ---
 title: "Paired column"
-output: html_document
+output: html_notebook
+runtime: shiny
 ---
 
 # Paired column
 
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-require(vegalite)
+require(xlsx) # Permet de lire des fichier xls
+require(httr) # Permet de faire des requêtes http
+require(altair) # Permet d'utiliser Vega-Lite
+```
+
+Importation des données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+# Lien des données depuis le site de l'Insee
+URL="https://insee.fr/fr/statistiques/fichier/3682672/if138.xls"
+
+# Téléchargement
+GET(URL, write_disk(tf <- tempfile(fileext = ".xls")))
+```
+
+Traitement des données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# on garde les variables utiles : les deux premières et les variations annuelles
+col<-c("character", "numeric", "numeric")
+
+donnees_paired_col <- read.xlsx2(tf, 1, startRow = 7, endRow = 24, header=TRUE, colClasses=col, colIndex = c(1,4,7))
+
+names(donnees_paired_col)[1] <- "Region"
+names(donnees_paired_col)[2] <- "Variation 2011-2016"
+names(donnees_paired_col)[3] <- "Variation 2006-2011"
+
+donnees_finales = data.frame(matrix(vector(), 34, 3,
+                dimnames=list(c(), c("Region", "Periode", "Variation"))),
+                stringsAsFactors=T)
+
+
+
+for (i in 0:16){
+  donnees_finales$Region[2*i+1] <- donnees_paired_col$Region[i+1]
+  donnees_finales$Region[2*(i+1)] <- donnees_paired_col$Region[i+1]
+  donnees_finales$Periode[2*i+1] <- "2006-2011"
+  donnees_finales$Periode[2*(i+1)] <- "2011-2016"
+  donnees_finales$Variation[2*i+1] <- donnees_paired_col$`Variation 2006-2011`[i+1]
+  donnees_finales$Variation[2*(i+1)] <- donnees_paired_col$`Variation 2011-2016`[i+1]
+}
+
 ```
 
 
-Jeu de données :
-```{r}
-data <- jsonlite::fromJSON('[
-      {"csp": "Employés","region": "1", "taux" : 27.08},
-      {"csp": "Employés","region": "2", "taux" : 26.16},
-      {"csp": "Ouvriers","region": "1", "taux" : 22.22},
-      {"csp": "Ouvriers","region": "2", "taux" : 19.83},
-      {"csp": "Professions intermédiaires","region": "1", "taux" : 17.59},
-      {"csp": "Professions intermédiaires","region": "2", "taux" : 17.69},
-      {"csp": "Artisans, commerçants et chefs d’entreprise","region": "1", "taux" : 17.32},
-      {"csp": "Artisans, commerçants et chefs d’entreprise","region": "2", "taux" : 16.67},
-      {"csp": "Cadres et professions intellectuelles supérieures","region": "1", "taux" : 11.52},
-      {"csp": "Cadres et professions intellectuelles supérieures","region": "2", "taux" : 15.15},
-      {"csp": "Agriculteurs exploitants","region": "1", "taux" : 4.27},
-      {"csp": "Agriculteurs exploitants","region": "2", "taux" : 4.5}
-      
-    ]')
+Construction du graphique
+```{r echo=TRUE}
+
+title_X <- "Periode"
+title_Y <- "Variation annuelle"
+
+paired_col <- alt$
+              Chart(donnees_finales)$
+              mark_bar()$
+              encode(
+                x = alt$X('Periode:O', axis = NULL),
+                y= alt$Y('Variation:Q', axis = alt$Axis(title = title_Y)),
+                column = "Region:N",
+                color = alt$Color('Periode:N')
+                
+              )$
+              properties(
+                title = "Paired column"
+              )
 ```
 
-```{r}
-
-test <- jsonlite::fromJSON("https://vega.github.io/vega-editor/app/data/population.json")
-
-vegalite() %>%
-  add_data(test) %>%
-  add_filter("datum.year == 2000") %>%
-  calculate("gender", 'datum.sex == 2 ? "Female" : "Male"') %>%
-  encode_x("gender", "nominal") %>%
-  encode_y("people", "quantitative", aggregate="sum") %>%
-  encode_color("gender", "nominal") %>%
-  scale_x_ordinal(band_size=6) %>%
-  scale_color_nominal(range=c("#EA98D2", "#659CCA")) %>%
-  facet_col("age", "ordinal", padding=4) %>%
-  axis_x(remove=TRUE) %>%
-  axis_y(title="population", grid=FALSE) %>%
-  axis_facet_col(orient="bottom", axisWidth=1, offset=-8) %>%
-  facet_cell(stroke_width=0) %>%
-  mark_bar()
-```
-
-```{r}
-vegalite(viewport_width=600) %>%
-  add_data(data) %>%
-  calculate("region2", expr = 'datum.region == 2 ? "France" : "Bourgogne-Franche-Comté"') %>%
-  encode_x("region2", "nominal") %>%         
-  encode_y("taux", "quantitative") %>%  
-  encode_color("region2", "nominal") %>%
-  scale_x_ordinal(band_size = 20) %>%
-  scale_color_nominal(range = c("#EA98D2", "#659CCA")) %>%
-  facet_col("csp", "ordinal", padding = 90) %>%
-  axis_x(remove = TRUE) %>%
-  axis_y(title = "Part (en %)", grid = FALSE) %>%
-  axis_facet_col(orient = "bottom", axisWidth = 1, offset = -8) %>%
-  facet_cell(stroke_width = 0) %>%
-  mark_bar()                               
+Affichage du graphique
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+paired_col
 ```

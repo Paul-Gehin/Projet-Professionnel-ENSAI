@@ -1,18 +1,79 @@
 ---
-title: "R Notebook"
+title: "Paired column"
 output: html_notebook
+runtime: shiny
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+# Paired column
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
-```{r}
-plot(cars)
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(xlsx) # Permet de lire des fichier xls
+require(httr) # Permet de faire des requêtes http
+require(altair) # Permet d'utiliser Vega-Lite
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+Importation des données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+# Lien des données depuis le site de l'Insee
+URL="https://insee.fr/fr/statistiques/fichier/3682672/if138.xls"
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+# Téléchargement
+GET(URL, write_disk(tf <- tempfile(fileext = ".xls")))
+```
+
+Traitement des données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# on garde les variables utiles : les deux premières et les variations annuelles
+col<-c("character", "numeric", "numeric")
+
+donnees_paired_col <- read.xlsx2(tf, 1, startRow = 7, endRow = 24, header=TRUE, colClasses=col, colIndex = c(1,4,7))
+
+names(donnees_paired_col)[1] <- "Region"
+names(donnees_paired_col)[2] <- "Variation 2011-2016"
+names(donnees_paired_col)[3] <- "Variation 2006-2011"
+
+donnees_finales = data.frame(matrix(vector(), 34, 3,
+                dimnames=list(c(), c("Region", "Periode", "Variation"))),
+                stringsAsFactors=T)
+
+
+
+for (i in 0:16){
+  donnees_finales$Region[2*i+1] <- donnees_paired_col$Region[i+1]
+  donnees_finales$Region[2*(i+1)] <- donnees_paired_col$Region[i+1]
+  donnees_finales$Periode[2*i+1] <- "2006-2011"
+  donnees_finales$Periode[2*(i+1)] <- "2011-2016"
+  donnees_finales$Variation[2*i+1] <- donnees_paired_col$`Variation 2006-2011`[i+1]
+  donnees_finales$Variation[2*(i+1)] <- donnees_paired_col$`Variation 2011-2016`[i+1]
+}
+
+```
+
+
+Construction du graphique
+```{r echo=TRUE}
+
+title_X <- "Variation annuelle"
+title_Y <- "Periode"
+
+paired_bar <- alt$
+              Chart(donnees_finales)$
+              mark_bar()$
+              encode(
+                x = alt$X('Variation:Q', axis = alt$Axis(title = title_X, orient = "top")),
+                y = alt$Y('Periode:O', axis = NULL),
+                row = "Region:N",
+                color = alt$Color('Periode:N')
+                
+              )$
+              properties(
+                title = "Paired bar"
+              )
+```
+
+Affichage du graphique
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+paired_bar
+```
