@@ -3,16 +3,34 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+library(altair)
+library(dplyr)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r}
+vega_data <- import_vega_data()
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+data <- vega_data$barley()
+```
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+Création d'une variable rate_yield représentant le taux de rendement par variété.
+
+```{r}
+data$group_variety <- data %>% group_indices(variety)
+data$rate_yield <- 0
+for (i in min(data$group_variety):max(data$group_variety)){
+  indices <- which(data$group_variety == i)
+  data$rate_yield[indices] <- data$yield[indices] / sum(data$yield[indices])  
+}
+```
+
+```{r}
+alt$Chart(data)$
+  mark_bar()$
+  encode(
+    y = 'variety',
+    x = 'sum(rate_yield)',
+    color = 'site'
+  )
+```
