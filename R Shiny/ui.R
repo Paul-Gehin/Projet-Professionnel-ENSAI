@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+require(vegawidget)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -29,16 +30,25 @@ shinyUI(fluidPage(
                  )),
         tabPanel("Correlation",
                  navlistPanel(
-                     tabPanel("Scatterplot",
-                              NULL),
+                     tabPanel(
+                         "Scatterplot",
+                         flowLayout(
+                            vegawidgetOutput("Scatterplot")
+                         )
+                     ),
                      tabPanel("Column + line Timeline",
                               NULL),
                      tabPanel("Connected Scatterplot",
                               NULL),
                      tabPanel("Bubble",
-                              NULL),
+                              flowLayout(
+                                  vegawidgetOutput("Bubble")
+                              )
+                     ),
                      tabPanel("XY heatmap",
-                              NULL)
+                              flowLayout(
+                                  vegawidgetOutput("Heatmap")
+                              ))
                  )),
         tabPanel("Ranking",
                  navlistPanel(
