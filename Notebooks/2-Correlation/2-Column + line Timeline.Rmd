@@ -1,18 +1,77 @@
 ---
-title: "R Notebook"
+title: "Column + line Timeline"
 output: html_notebook
+runtime: shiny
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+Un bon moyen de montrer la relation entre une quantité (colonnes) et un taux (ligne).
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
-```{r}
-plot(cars)
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(xlsx) # Permet de lire des fichier xls
+require(httr) # Permet de faire des requêtes http
+require(altair) # Permet d'utiliser Vega-Lite
+#install_altair(pip = T)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+On importe les données
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+# Depuis le site de l'insee
+URL <- "https://www.insee.fr/fr/statistiques/fichier/1892086/pop-totale-france.xls"
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+#On les importe
+GET(URL, write_disk(tf <- tempfile(fileext = ".html")))
+donnees <- readHTMLTable(tf, which = 1,
+                         header = TRUE,
+                         skip.rows = c(1, 2, 3, 4, 5, 107,108, 109),
+                         encoding="UTF-8",
+                         stringsAsFactors = FALSE,
+                         colClasses = c("character", "integer", "character", "character", "character", "character"))
+
+donnees_finales <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`,nb_femmes=as.integer(gsub(" ", "", donnees$`Nombre de femmes`, fixed = TRUE)),nb_hommes=as.integer(gsub(" ", "", donnees$`Nombre d'hommes`, fixed = TRUE)))
+
+donnees_finales$femme<-'Femmes'
+donnees_finales$homme<-'Hommes'
+```
+
+
+On construit ensuite l'objet vegalite ...
+```{r echo=TRUE}
+point <- alt$Chart(donnees_finales)$mark_point()$encode(
+  y=alt$Y('nb_femmes:Q'),
+  x=alt$X('Age_revolu:Q'),
+  color=alt$Color('FEM:N', legend=alt$Legend(title="Efectifs hommes/femmes"),scale=alt$Scale(
+    domain=c('Femmes','Hommes'),
+    range=c('red','green'))),
+  tooltip = c("Age_revolu:Q","nb_femmes:Q")
+)
+
+point2 <- alt$Chart(donnees_finales)$mark_point()$encode(
+  y=alt$Y('nb_hommes:Q'),
+  x=alt$X('Age_revolu:Q'),
+  color=alt$Color('HOM:N',scale=alt$Scale(
+    domain=c('Hommes'),
+    range=c('green'))),
+  tooltip = c("Age_revolu:Q","nb_hommes:Q")
+)
+
+bar <- alt$Chart(donnees_finales)$mark_bar()$encode(
+  x=alt$X('Age_revolu:Q', axis=alt$Axis(title="Age"),
+          bin = alt$Bin(maxbins = 20)),
+  y=alt$Y('Ensemble:Q', axis=alt$Axis(title="Population totale en 2018")),
+  tooltip = c("Age_revolu:Q","Ensemble:Q"),
+)
+
+chart<-bar+point+point2$properties(title="Column + line timeline")
+```
+
+
+On affiche le graphique
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
+chart
+```
+
+On obtient le schéma JSON correspondant.
+```{r echo=TRUE}
+chart$to_json()
+```
