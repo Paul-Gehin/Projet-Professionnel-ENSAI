@@ -3,16 +3,24 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+library(altair)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r}
+data_simulees <- jsonlite::fromJSON('[
+      {"annee": "2010","y": 28}, {"annee": "2011","y": 55}, {"annee": "2018","y": 43},
+      {"annee": "2005","y": 91}, {"annee": "2007","y": 40}, {"annee": "2015","y": 53},
+      {"annee": "2016","y": 19}, {"annee": "2012","y": 87}, {"annee": "2008","y": 75}
+    ]')
+```
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+alt$Chart(data_simulees)$
+  encode(
+    x = "annee:T",
+    y = "y:Q"
+    )$
+  mark_line(point = T)
+```
