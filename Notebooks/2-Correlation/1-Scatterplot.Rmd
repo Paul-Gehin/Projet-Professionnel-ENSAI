@@ -10,7 +10,6 @@ La représentation standard de la relation entre deux variables continues, chacu
 require(xlsx) # Permet de lire des fichier xls
 require(httr) # Permet de faire des requêtes http
 require(altair) # Permet d'utiliser Vega-Lite
-#install_altair(pip = T)
 ```
 
 On importe les données
@@ -26,18 +25,22 @@ xls<-unzip(temp, "base_cc_comparateur.xls")
 unlink(temp)
 
 #on sélectionne les variables qui nous intéressent (ici les 10 premières)
-c1<-c("character",  "character", "character", "character","integer","integer" ,"integer" ,"integer" ,"integer" ,"integer"  )
-c2<-rep("NULL",26)
-col <- c(c1,c2)
+col<-c("character",  "character", "character", "character","integer","integer" ,"integer" ,"integer" ,"integer" ,"integer"  )
 
-data<-read.xlsx2(xls, 1,startRow = 6, header=TRUE, colClasses=col)
+donnees_scatterplot <- read.xlsx2(xls, 1, startRow = 6, endRow = 5000, header=TRUE, colClasses=col, colIndex = 1:10)
+```
+
+On sauvegarde les données pour une utilisation ultérieure.
+```{r echo=TRUE}
+filename <- paste(dirname(dirname(dirname(rstudioapi::getSourceEditorContext()$path))),"/Data/Scatterplot.Rdata", sep = "")
+save(donnees_scatterplot, file = filename)
 ```
 
 
 On construit ensuite l'objet vegalite ...
 ```{r echo=TRUE}
 scatterplot <- 
-  alt$Chart(data)$
+  alt$Chart(na.omit(donnees_scatterplot))$
   mark_point()$
   encode(
     x = alt$X('DECE1015:Q', axis=alt$Axis(title="Décès entre 2010 et 2015")),

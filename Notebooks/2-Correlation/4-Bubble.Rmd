@@ -15,29 +15,15 @@ require(altair) # Permet d'utiliser Vega-Lite
 
 On importe les données
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-# Depuis le site de l'insee
-URL="https://insee.fr/fr/statistiques/fichier/2521169/base_cc_comparateur.zip"
-
-#on les télecharge et on les dézip
-temp <- tempfile()
-download.file(URL,temp)
-xls<-unzip(temp, "base_cc_comparateur.xls")
-unlink(temp)
-
-#on sélectionne les variables qui nous intéressent (ici les 10 premières)
-c1<-c("character",  "character", "character", "character","integer","integer" ,"integer" ,"integer" ,"integer" ,"integer"  )
-c2<-rep("NULL",26)
-col <- c(c1,c2)
-
-data<-read.xlsx2(xls, 1,startRow = 6, header=TRUE, colClasses=col)
+path_dossier_projet <- dirname(dirname(dirname(rstudioapi::getSourceEditorContext()$path)))
+load(paste(path_dossier_projet,"/Data/Scatterplot.Rdata", sep = ""))
 ```
 
 
 On construit ensuite l'objet vegalite ...
 ```{r echo=TRUE}
 bubbles <- 
-  alt$Chart(data)$
+  alt$Chart(na.omit(donnees_scatterplot))$
   mark_circle()$
   encode(
     x = alt$X('DECE1015:Q', axis=alt$Axis(title="Décès entre 2010 et 2015")),
