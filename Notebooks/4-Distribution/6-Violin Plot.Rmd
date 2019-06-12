@@ -9,30 +9,37 @@ output:
 
 ```{r}
 library(altair)
+library(dplyr)
 ```
 
 ```{r}
 vega_data <- import_vega_data()
 
-data <- vega_data$cars()
+data <- vega_data$cars() %>% filter(Miles_per_Gallon > 0)
+
 ```
 
 ```{r}
 
-alt$Chart(data)$transform_filter(
-    data$Miles_per_Gallon > 0)$
-  transform_bin(c('bin_max', 'bin_min'), field='Miles_per_Gallon', bin=alt$Bin(maxbins=20))$
-  transform_calculate(binned=(data$bin_max + data$bin_min) / 2)$
+alt$Chart(data)$
+  transform_bin(c('binned'), field='Miles_per_Gallon', bin=alt$Bin(maxbins=20))$
   transform_aggregate(value_count='count()', groupby=c('Origin', 'binned'))$
-  transform_impute(impute='value_count', groupby=c('Origin'), key='binned', value=0)$
   mark_area(interpolate='monotone', orient='horizontal')$
   encode(
-    x=alt$X('value_count:Q',title=None,stack='center',axis=alt$Axis(labels=False, values=0,grid=False, ticks=True)),
+    x=alt$X('value_count:Q',title=NULL,stack='center',axis=alt$Axis(labels=F, grid=F, ticks=T)),
     y=alt$Y('binned:Q', bin='binned', title='Miles per Gallon'),
-    color=alt$Color('Origin:N', legend=None),
-    column=alt$Column('Origin:N',header=alt$Header(titleOrient='bottom', labelOrient='bottom', labelPadding=0)))$
-  properties(width=80)$
-  configure_facet(spacing=0)$
-  configure_view(stroke=None)
+    color=alt$Color('Origin:N', legend=NULL),
+    column=alt$Column(
+        'Origin:N',
+        header=alt$Header(
+            titleOrient='bottom',
+            labelOrient='bottom',
+            labelPadding=0)))$
+  properties(
+    width=80)$
+  configure_facet(
+    spacing=0)$
+  configure_view(
+    stroke=NULL)
 
 ```
