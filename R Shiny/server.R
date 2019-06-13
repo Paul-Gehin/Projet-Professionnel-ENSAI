@@ -41,6 +41,7 @@ shinyServer(function(input, output) {
     output$DotStripPlot_bis <- renderVegawidget(vegawidget(dotStripPlot))
     output$Barcode <- renderVegawidget(vegawidget(barcode))
     output$ConnectedScatterplot <- renderVegawidget(vegawidget(connectedScatterplot))
+    output$ConnectedScatterplot_bis <- renderVegawidget(vegawidget(connectedScatterplot))
     output$AreaChart <- renderVegawidget(vegawidget(areaChart))
     output$Slope <- renderVegawidget(vegawidget(slope))
     output$Slope_bis <- renderVegawidget(vegawidget(slope))
@@ -136,6 +137,11 @@ shinyServer(function(input, output) {
         }
     })
     output$ConnectedScatterplot_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/8-Connected scatterplot.Rmd", sep = ""))
+        }
+    })
+    output$ConnectedScatterplot_bis_Rmd <- renderUI({
         if (input$Display) {
             includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/8-Connected scatterplot.Rmd", sep = ""))
         }

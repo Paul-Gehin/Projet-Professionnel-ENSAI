@@ -66,7 +66,9 @@ shinyUI(fluidPage(
                                   )),
                          tabPanel("Connected Scatterplot",
                                   verticalLayout(
-                                      p("Usually used to show how the relationship between 2 variables has changed over time")
+                                      p("Usually used to show how the relationship between 2 variables has changed over time"),
+                                      vegawidgetOutput("ConnectedScatterplot_bis"),
+                                      uiOutput("ConnectedScatterplot_bis_Rmd")
                                   )),
                          tabPanel("Bubble",
                                   verticalLayout(
