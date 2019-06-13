@@ -7,17 +7,19 @@ output: html_notebook
 library(altair)
 ```
 
+On utilise un jeu de donnees du package altair :
 ```{r}
 vega_data <- import_vega_data()
 
 data <- vega_data$cars()
 ```
 
+On réalise le graphique :
 ```{r}
-alt$Chart(data)$
-  mark_tick(color = 'black')$
+alt$Chart(data)$                               #On definit le jeu de donnees a utiliser
+  mark_tick(color = 'black')$                  #On choisit la representation (ici des lignes noirs)
   encode(
-    x='Horsepower:Q',
-    y='Cylinders:O'
+    x='Horsepower:Q',                          #On choisit la variable en x
+    y='Cylinders:O'                            #et celle en y
 )
 ```

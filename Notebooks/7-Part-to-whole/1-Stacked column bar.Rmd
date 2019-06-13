@@ -9,12 +9,14 @@ output: html_notebook
 library(altair)
 ```
 
+On utilise un jeu de donnees du package altair :
 ```{r}
 vega_data <- import_vega_data()
 
 data <- vega_data$barley()
 ```
 
+On réalise le graphique :
 ```{r}
 alt$Chart(data)$
   mark_bar()$

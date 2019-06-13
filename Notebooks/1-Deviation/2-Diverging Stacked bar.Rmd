@@ -8,6 +8,8 @@ output: html_notebook
 library(altair)
 ```
 
+On simule des données : 
+
 ```{r}
 data <- jsonlite::fromJSON('[
       {
@@ -341,10 +343,16 @@ data <- jsonlite::fromJSON('[
       )
 ```
 
+
+
+
+Et on réalise le graphique  :
+
 ```{r}
-color_scale = alt$Scale(
-    domain=c(
-        "Strongly disagree",
+#On definit la palette de couleurs. Cette operation peut etre realise apres mais est faite ici pour une question de clarte
+color_scale = alt$Scale(                          
+    domain=c(                                     
+        "Strongly disagree",                      
         "Disagree",
         "Neither agree nor disagree",
         "Agree",
@@ -353,21 +361,25 @@ color_scale = alt$Scale(
     range=c("#c30d24", "#f3a583", "#cccccc", "#94c6da", "#1770ab")
 )
 
-y_axis = alt$Axis(
-    title='Question',
+
+#On definit l'axe y. Ceci peut etre fait plus tard, comme la palette de couleurs
+y_axis = alt$Axis(                                
+    title='Question',                           
     offset=5,
     ticks=F,
     minExtent=60,
     domain=F
 )
 
-alt$Chart(data)$
-  mark_bar()$
+
+#On s'attaque au graphique
+alt$Chart(data)$                           #On definit le jeu de donnees a utiliser
+  mark_bar()$                              #On choisit le type de representation (ici des batons)
   encode(
-    x='percentage_start:Q',
-    x2='percentage_end:Q',
-    y=alt$Y('question:N', axis=y_axis),
-    color=alt$Color(
+    x='percentage_start:Q',                #On definit la variable en x
+    x2='percentage_end:Q',                 #une deuxieme en x
+    y=alt$Y('question:N', axis=y_axis),    #celle en y
+    color=alt$Color(                       #et la couleur
         'type:N',
         legend=alt$Legend( title='Response'),
         scale=color_scale

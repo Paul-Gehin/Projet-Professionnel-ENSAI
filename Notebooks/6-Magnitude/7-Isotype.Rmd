@@ -8,6 +8,7 @@ output: html_notebook
 library(altair)
 ```
 
+On simule les donnees :
 ```{r}
 data <- jsonlite::fromJSON('[
       {"country": "Great Britain", "animal": "cattle"},
@@ -66,9 +67,12 @@ data <- jsonlite::fromJSON('[
 
 ```
 
+On réalise le graphique :
 ```{r}
+#On definit les modalites
 domains <- c('1person', 'cattle', 'pigs', 'sheep')
 
+#On definit les formes 
 shape_scale = alt$Scale(
     domain=domains,
     range=c(
@@ -81,12 +85,13 @@ shape_scale = alt$Scale(
 
 
 
-
+#On definit la palette de couleurs
 color_scale <- alt$Scale(
     domain=domains,
     range=c('rgb(70,70,180)', 'rgb(194,81,64)', 'rgb(235,110,175)', 'rgb(150,150,150)')
 )
 
+#On realise le graphique
 alt$Chart(data)$
   mark_point(filled=T, opacity=1, size=100)$
   encode(

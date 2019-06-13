@@ -8,6 +8,8 @@ output: html_notebook
 library(altair)
 ```
 
+On simule les donnees :
+
 ```{r}
 
 data <-jsonlite::fromJSON('
@@ -215,14 +217,17 @@ data <-jsonlite::fromJSON('
 
 ```
 
+On réalise le graphique :
 ```{r}
 
-rule <- alt$Chart(data)$
-  mark_rule(color = 'black')$
+rule <- alt$Chart(data)$                  #On definit le jeu de donnees a utiliser
+  mark_rule(color = 'black')$             #On choisit la representation (ici des lignes noires)
   encode(
     alt$X(
         'yearmonthdate(date):T',
-        axis=alt$Axis(format='%m/%d', title='Date in june 2009')
+        axis=alt$Axis(
+          format='%m/%d',
+          title='Date in june 2009')
     ),
     alt$Y(
         'low',
@@ -232,15 +237,15 @@ rule <- alt$Chart(data)$
     alt$Y2('high')
 )
 
-bar <- alt$Chart(data)$
-  mark_bar(color = 'black')$
+bar <- alt$Chart(data)$                   #On definit le jeu de donnees a utiliser
+  mark_bar(color = 'black')$              #On choisit la representation (ici des batons noires)
   encode(
     x='yearmonthdate(date):T',
     y='open',
     y2='close'
 )
 
-rule + bar
+rule + bar                                #On superpose les deux graphiques que l'on a fait
 
 ```
 

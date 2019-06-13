@@ -5,32 +5,22 @@ output: html_notebook
 
 ```{r}
 library(altair)
-library(dplyr)
 ```
 
+On utilise un jeu de donnees du package altair :
 ```{r}
 vega_data <- import_vega_data()
 
 data <- vega_data$barley()
 ```
 
-Création d'une variable rate_yield représentant le taux de rendement par variété.
-
-```{r}
-data$group_variety <- data %>% group_indices(variety)
-data$rate_yield <- 0
-for (i in min(data$group_variety):max(data$group_variety)){
-  indices <- which(data$group_variety == i)
-  data$rate_yield[indices] <- data$yield[indices] / sum(data$yield[indices])  
-}
-```
-
+On réalise le graphique :
 ```{r}
 alt$Chart(data)$
   mark_bar()$
   encode(
     y = 'variety',
-    x = 'sum(rate_yield)',
+    x = alt$X('sum(yield)', stack = "normalize"),
     color = 'site'
   )
 ```
