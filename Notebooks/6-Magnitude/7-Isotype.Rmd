@@ -27,6 +27,11 @@ data <- jsonlite::fromJSON('[
       {"country": "Great Britain", "animal": "sheep"},
       {"country": "Great Britain", "animal": "sheep"},
       {"country": "Great Britain", "animal": "sheep"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
       {"country": "United States", "animal": "cattle"},
       {"country": "United States", "animal": "cattle"},
       {"country": "United States", "animal": "cattle"},
@@ -48,13 +53,21 @@ data <- jsonlite::fromJSON('[
       {"country": "United States", "animal": "sheep"},
       {"country": "United States", "animal": "sheep"},
       {"country": "United States", "animal": "sheep"},
-      {"country": "United States", "animal": "sheep"}
+      {"country": "United States", "animal": "sheep"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"}
     ]')
 
 ```
 
 ```{r}
-domains <- c('person', 'cattle', 'pigs', 'sheep')
+domains <- c('1person', 'cattle', 'pigs', 'sheep')
 
 shape_scale = alt$Scale(
     domain=domains,
@@ -71,7 +84,7 @@ shape_scale = alt$Scale(
 
 color_scale <- alt$Scale(
     domain=domains,
-    range=c('rgb(162,160,152)', 'rgb(194,81,64)', 'rgb(93,93,93)', 'rgb(91,131,149)')
+    range=c('rgb(70,70,180)', 'rgb(194,81,64)', 'rgb(235,110,175)', 'rgb(150,150,150)')
 )
 
 alt$Chart(data)$
@@ -85,5 +98,5 @@ alt$Chart(data)$
   transform_window(
     x='rank()',
     groupby=c('country', 'animal'))$
-  properties(width=550, height=140)
+  properties(width=550, height=200)
 ```
