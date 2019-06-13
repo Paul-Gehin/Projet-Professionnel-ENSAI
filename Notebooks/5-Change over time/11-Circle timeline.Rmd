@@ -9,6 +9,7 @@ library(altair)
 library(dplyr)
 ```
 
+On utilise un jeu de donnees du package altair :
 ```{r}
 vega_data <- import_vega_data()
 
@@ -16,19 +17,25 @@ data <- vega_data$disasters()
 data2 <- data %>% filter(Entity != "All natural disasters") 
 ```
 
+On réalise le graphique :
 ```{r}
-alt$Chart(data2)$
-  mark_circle(
+alt$Chart(data2)$                 #On definit le jeu de donnees a utiliser
+  mark_circle(                    #On choisit la representation (ici des cercles de contours noirs)
     opacity=0.8,
     stroke='black',
     strokeWidth=1)$
   encode(
-    alt$X('Year:O', axis=alt$Axis(labelAngle=0)),
+    alt$X(
+      'Year:O',
+      axis=alt$Axis(labelAngle=0)),
     alt$Y('Entity:N'),
-    alt$Size('Deaths:Q',
-        legend=alt$Legend(title='Annual Global Deaths')
+    alt$Size(
+      'Deaths:Q',
+      legend=alt$Legend(title='Annual Global Deaths')
     ),
-    alt$Color('Entity:N', legend = NULL))$
+    alt$Color(
+      'Entity:N', 
+      legend = NULL))$
   properties(
     width=450,
     height=320)

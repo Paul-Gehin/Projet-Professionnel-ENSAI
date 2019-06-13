@@ -7,6 +7,7 @@ output: html_notebook
 library(altair)
 ```
 
+On simule les donnees : 
 ```{r}
 data_simulees <- jsonlite::fromJSON('[
       {"annee": "2010","y": 28}, {"annee": "2011","y": 55}, {"annee": "2018","y": 43},
@@ -15,12 +16,12 @@ data_simulees <- jsonlite::fromJSON('[
     ]')
 ```
 
-
+On réalise le graphique :
 ```{r}
-alt$Chart(data_simulees)$
+alt$Chart(data_simulees)$       #On definit le jeu de donnees a utiliser
   encode(
     x = "annee:T",
     y = "y:Q"
     )$
-  mark_line(point = T)
+  mark_line(point = T)          #On choisit la representation (ici des lignes avec les points)
 ```

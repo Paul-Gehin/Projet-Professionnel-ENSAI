@@ -9,18 +9,20 @@ output: html_notebook
 library(altair)
 ```
 
+On utilise un jeu de donnees du package altair :
 ```{r}
 vega_data <- import_vega_data()
 
 data <- vega_data$barley()
 ```
 
+On réalise le graphique :
 ```{r}
-alt$Chart(data)$
-  mark_line()$
+alt$Chart(data)$                     #On definit le jeu de donnees a utiliser
+  mark_line()$                       #On choisit la representation (ici des lignes)
   encode(
-    x='year:O',
-    y='median(yield)',
+    x='year:O',                      #on choisit la variable en x 
+    y='median(yield)',               #et celle en y
     color='site')$
   properties(
     width=500,

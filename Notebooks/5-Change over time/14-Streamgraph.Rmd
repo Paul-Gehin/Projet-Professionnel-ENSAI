@@ -9,17 +9,19 @@ output:
 
 ```{r}
 library(altair)
-
-vega_data <- import_vega_data()
 ```
 
-
+On utilise un jeu de donnees du package altair :
 ```{r}
+vega_data <- import_vega_data()
+
 data <- vega_data$unemployment_across_industries()
+```
 
-
-alt$Chart(data)$
-  mark_area()$
+On cree le graphique :
+```{r}
+alt$Chart(data)$                         #On definit le jeu de donnees a utiliser
+  mark_area()$                           #On choisit la representation (ici des zones)
   encode(
     alt$X('yearmonth(date):T',
         axis=alt$Axis(format='%Y', domain=F, tickSize=0)

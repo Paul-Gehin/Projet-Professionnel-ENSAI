@@ -8,6 +8,7 @@ output: html_notebook
 library(altair)
 ```
 
+On simule les donnees :
 ```{r}
 data <- jsonlite::fromJSON('[
       {"country": "Great Britain", "animal": "cattle"},
@@ -27,6 +28,11 @@ data <- jsonlite::fromJSON('[
       {"country": "Great Britain", "animal": "sheep"},
       {"country": "Great Britain", "animal": "sheep"},
       {"country": "Great Britain", "animal": "sheep"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
+      {"country": "Great Britain", "animal": "1person"},
       {"country": "United States", "animal": "cattle"},
       {"country": "United States", "animal": "cattle"},
       {"country": "United States", "animal": "cattle"},
@@ -48,14 +54,25 @@ data <- jsonlite::fromJSON('[
       {"country": "United States", "animal": "sheep"},
       {"country": "United States", "animal": "sheep"},
       {"country": "United States", "animal": "sheep"},
-      {"country": "United States", "animal": "sheep"}
+      {"country": "United States", "animal": "sheep"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"},
+      {"country": "United States", "animal": "1person"}
     ]')
 
 ```
 
+On réalise le graphique :
 ```{r}
-domains <- c('person', 'cattle', 'pigs', 'sheep')
+#On definit les modalites
+domains <- c('1person', 'cattle', 'pigs', 'sheep')
 
+#On definit les formes 
 shape_scale = alt$Scale(
     domain=domains,
     range=c(
@@ -68,12 +85,13 @@ shape_scale = alt$Scale(
 
 
 
-
+#On definit la palette de couleurs
 color_scale <- alt$Scale(
     domain=domains,
-    range=c('rgb(162,160,152)', 'rgb(194,81,64)', 'rgb(93,93,93)', 'rgb(91,131,149)')
+    range=c('rgb(70,70,180)', 'rgb(194,81,64)', 'rgb(235,110,175)', 'rgb(150,150,150)')
 )
 
+#On realise le graphique
 alt$Chart(data)$
   mark_point(filled=T, opacity=1, size=100)$
   encode(
@@ -85,5 +103,5 @@ alt$Chart(data)$
   transform_window(
     x='rank()',
     groupby=c('country', 'animal'))$
-  properties(width=550, height=140)
+  properties(width=550, height=200)
 ```

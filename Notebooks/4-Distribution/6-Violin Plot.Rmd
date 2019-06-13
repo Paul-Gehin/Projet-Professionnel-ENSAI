@@ -12,6 +12,7 @@ library(altair)
 library(dplyr)
 ```
 
+On utilise un jeu de donnees du package altair :
 ```{r}
 vega_data <- import_vega_data()
 
@@ -19,15 +20,33 @@ data <- vega_data$cars() %>% filter(Miles_per_Gallon > 0)
 
 ```
 
+On réalise le graphique :
 ```{r}
 alt$Chart(data)$
-  transform_bin(c('binned'), field='Miles_per_Gallon', bin=alt$Bin(maxbins=20))$
-  transform_aggregate(value_count='count()', groupby=c('Origin', 'binned'))$
+  transform_bin(
+    c('binned'),
+    field='Miles_per_Gallon',
+    bin=alt$Bin(maxbins=20))$
+  transform_aggregate(
+    value_count='count()',
+    groupby=c('Origin', 'binned'))$
   mark_area(interpolate='monotone', orient='horizontal')$
   encode(
-    x=alt$X('value_count:Q',title=NULL,stack='center',axis=alt$Axis(labels=F, grid=F, ticks=T)),
-    y=alt$Y('binned:Q', bin='binned', title='Miles per Gallon'),
-    color=alt$Color('Origin:N', legend=NULL),
+    x=alt$X(
+      'value_count:Q',
+      title=NULL,
+      stack='center',
+      axis=alt$Axis(
+        labels=F,
+        grid=F,
+        ticks=T)),
+    y=alt$Y(
+      'binned:Q',
+      bin='binned',
+      title='Miles per Gallon'),
+    color=alt$Color(
+      'Origin:N',
+      legend=NULL),
     column=alt$Column(
         'Origin:N',
         header=alt$Header(
