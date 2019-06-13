@@ -8,9 +8,6 @@
 #
 
 library(shiny)
-require(XML) # Permet de parser les fichiers XML
-require(httr) # Permet de faire des requetes http
-require(altair) # Permet d'utiliser Vega-Lite
 require(vegawidget)
 
 
@@ -46,9 +43,12 @@ shinyServer(function(input, output) {
     output$ConnectedScatterplot <- renderVegawidget(vegawidget(connectedScatterplot))
     output$AreaChart <- renderVegawidget(vegawidget(areaChart))
     output$Slope <- renderVegawidget(vegawidget(slope))
+    output$Slope_bis <- renderVegawidget(vegawidget(slope))
     output$Candlestick <- renderVegawidget(vegawidget(candlestick))
     output$Isotype <- renderVegawidget(vegawidget(isotype))
     output$ColumnLineTimeline <- renderVegawidget(vegawidget(columnLineTimeline))
+    output$ColumnLineTimeline_bis <- renderVegawidget(vegawidget(columnLineTimeline))
+    output$DivergingStackedBar <- renderVegawidget(vegawidget(divergingStackedBar))
     
     output$Histogram_Rmd <- renderUI({
         if (input$Display) {
@@ -150,6 +150,11 @@ shinyServer(function(input, output) {
             includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/4-Slope.Rmd", sep = ""))
         }
     })
+    output$Slope_bis_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/4-Slope.Rmd", sep = ""))
+        }
+    })
     output$Candlestick_Rmd <- renderUI({
         if (input$Display) {
             includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/6-Candlestick.Rmd", sep = ""))
@@ -163,6 +168,16 @@ shinyServer(function(input, output) {
     output$ColumnLineTimeline_Rmd <- renderUI({
         if (input$Display) {
             includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/2-Correlation/2-Column + line Timeline.Rmd", sep = ""))
+        }
+    })
+    output$ColumnLineTimeline_bis_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/2-Correlation/2-Column + line Timeline.Rmd", sep = ""))
+        }
+    })
+    output$DivergingStackedBar_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/1-Deviation/2-Diverging Stacked bar.Rmd", sep = ""))
         }
     })
     

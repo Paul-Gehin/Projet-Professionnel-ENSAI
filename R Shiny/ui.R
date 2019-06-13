@@ -31,7 +31,9 @@ shinyUI(fluidPage(
                                   )),
                          tabPanel("Diverging Stacked Bar",
                                   verticalLayout(
-                                      p("Perfect for presenting survey results which involve sentiment (eg disagree, neutral, agree)")
+                                      p("Perfect for presenting survey results which involve sentiment (eg disagree, neutral, agree)"),
+                                      vegawidgetOutput("DivergingStackedBar"),
+                                      uiOutput("DivergingStackedBar_Rmd")
                                   )),
                          tabPanel("Spine",
                                   verticalLayout(
@@ -201,11 +203,15 @@ shinyUI(fluidPage(
                                   )),
                          tabPanel("Column + line timeline",
                                   verticalLayout(
-                                      p("A good way of showing the relationship over time between an amount (columns) and a rate (line)")
+                                      p("A good way of showing the relationship over time between an amount (columns) and a rate (line)"),
+                                      vegawidgetOutput("ColumnLineTimeline_bis"),
+                                      uiOutput("ColumnLineTimeline_bis_Rmd")
                                   )),
                          tabPanel("Slope",
                                   verticalLayout(
-                                      p("Good for showing changing data as long as the data can be simplified into 2 or 3 points without missing a key part of story")
+                                      p("Good for showing changing data as long as the data can be simplified into 2 or 3 points without missing a key part of story"),
+                                      vegawidgetOutput("Slope_bis"),
+                                      uiOutput("Slope_bis_Rmd")
                                   )),
                          tabPanel("Area chart",
                                   verticalLayout(
