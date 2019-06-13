@@ -13,103 +13,157 @@ require(httr) # Permet de faire des requetes http
 require(altair) # Permet d'utiliser Vega-Lite
 require(vegawidget)
 
-Unaccent <- function(text) {
-    text <- gsub("['`^~\"]", " ", text)
-    text <- iconv(text, to="ASCII//TRANSLIT//IGNORE")
-    text <- gsub("['`^~\"]", "", text)
-    return(text)
+
+# Fetch graphs
+path_dossier_projet <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
+files <- list.files(paste(path_dossier_projet,"/Graphs", sep = ""))
+for (i in 1:length(files)) {
+    load(paste(path_dossier_projet, "/Graphs/", files[i], sep = ""))
 }
 
-# Fetch data for Histogram
-path_dossier_projet <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
-load(paste(path_dossier_projet,"/Data/Histogram.Rdata", sep = ""))
 
-# Fetch data for Line
-donnees_line <- jsonlite::fromJSON("https://www.data.gouv.fr/es/datasets/r/0cb7962b-1358-488f-a433-8d452d8d6257")$fields
-
-# Fetch data for Scatterplot, Bubbles and HeatMap
-load(paste(path_dossier_projet,"/Data/Scatterplot.Rdata", sep = ""))
-
-scatterplot_spec <- 
-    alt$Chart(na.omit(donnees_scatterplot))$
-    mark_point()$
-    encode(
-        x = alt$X('DECE1015:Q', axis=alt$Axis(title="Deces entre 2010 et 2015")),
-        y = alt$Y('NAIS1015:Q', axis=alt$Axis(title="Naissances entre 2010 et 2015")),
-        color = alt$Color('REG:N', legend=alt$Legend(title="Regions")),
-        tooltip = c("LIBGEO","DECE1015", "NAIS1015", "REG")
-    )$
-    properties(
-        title = "Scatterplot"
-    )#$interactive()
-
-bubble_spec <- 
-    alt$Chart(na.omit(donnees_scatterplot))$
-    mark_circle()$
-    encode(
-        x = alt$X('DECE1015:Q', axis=alt$Axis(title="Deces entre 2010 et 2015")),
-        y = alt$Y('NAIS1015:Q', axis=alt$Axis(title="Naissances entre 2010 et 2015")),
-        color = alt$Color('REG:N', legend=alt$Legend(title="Regions")),
-        size = alt$Size('P15_POP:Q', legend=alt$Legend(title="Population en 2015")),
-        tooltip = c("LIBGEO","DECE1015", "NAIS1015", "REG")
-    )$
-    properties(
-        title = "Bubbles"
-    )#$interactive()
-
-heatmap_spec <- alt$Chart(na.omit(donnees_scatterplot))$mark_rect()$encode(    
-    x=alt$X('DECE1015:Q', axis=alt$Axis(title="Deces entre 2010 et 2015")),
-    y=alt$Y('NAIS1015:Q', axis=alt$Axis(title="Naissances entre 2010 et 2015")),
-    color=alt$Color('P15_POP:Q', legend=alt$Legend(title="Population en 2015")),
-    tooltip=c("LIBGEO","DECE1015", "NAIS1015", "REG","P15_POP")
-)$
-    properties(
-        title = "XY Heatmap"
-    )#$interactive()
-
-scatterplot <- vegawidget(scatterplot_spec)
-bubble <- vegawidget(bubble_spec)
-heatmap <- vegawidget(heatmap_spec)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
     
-    output$Histogram <- renderUI({
-        vl <- alt$
-            Chart(donnees_histogramme)$
-            mark_bar()$
-            encode(
-                alt$X("Age_revolu:Q",
-                      bin = alt$Bin(maxbins = input$nombre_bins_histogramme),
-                      axis = alt$Axis(title = "Âge révolu")),
-                y = alt$Y('sum(Ensemble):Q',
-                          axis = alt$Axis(title = "Total de personnes"))
-            )$
-            properties(
-                title = input$titre_histogramme
-            )
-
-        HTML(vegawidget::vw_to_svg(vegawidget(vl, embed = vega_embed(renderer = "svg"))))
-        
+    output$Histogram <- renderVegawidget(vegawidget(histogram))
+    output$Line <- renderVegawidget(vegawidget(line_graph))
+    output$Scatterplot <- renderVegawidget(vegawidget(scatterplot))
+    output$Bubble <- renderVegawidget(vegawidget(bubbles))
+    output$Heatmap <- renderVegawidget(vegawidget(XYheatmap))
+    output$ViolinPlot <- renderVegawidget(vegawidget(violinPlot))
+    output$CircleTimeline <- renderVegawidget(vegawidget(circleTimeline))
+    output$PairedColumn <- renderVegawidget(vegawidget(pairedColumn))
+    output$PairedBar <- renderVegawidget(vegawidget(pairedBar))
+    output$Pyramid <- renderVegawidget(vegawidget(pyramid))
+    output$Streamgraph <- renderVegawidget(vegawidget(streamgraph))
+    output$Marimekko <- renderVegawidget(vegawidget(marimekko))
+    output$Marimekko_bis <- renderVegawidget(vegawidget(marimekko))
+    output$StackedColumnBar <- renderVegawidget(vegawidget(stackedColumnBar))
+    output$DotStripPlot <- renderVegawidget(vegawidget(dotStripPlot))
+    output$DotStripPlot_bis <- renderVegawidget(vegawidget(dotStripPlot))
+    output$Barcode <- renderVegawidget(vegawidget(barcode))
+    output$ConnectedScatterplot <- renderVegawidget(vegawidget(connectedScatterplot))
+    output$AreaChart <- renderVegawidget(vegawidget(areaChart))
+    output$Slope <- renderVegawidget(vegawidget(slope))
+    output$Candlestick <- renderVegawidget(vegawidget(candlestick))
+    output$Isotype <- renderVegawidget(vegawidget(isotype))
+    output$ColumnLineTimeline <- renderVegawidget(vegawidget(columnLineTimeline))
+    
+    output$Histogram_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/4-Distribution/1-Histogram.Rmd", sep = ""))
+        }
+    })
+    output$Line_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/1-Line.Rmd", sep = ""))
+        }
+    })
+    output$Scatterplot_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/2-Correlation/1-Scatterplot.Rmd", sep = ""))
+        }
+    })
+    output$Bubble_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/2-Correlation/4-Bubble.Rmd", sep = ""))
+        }
+    })
+    output$Heatmap_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/2-Correlation/5-XY heatmap.Rmd", sep = ""))
+        }
+    })
+    output$ViolinPlot_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/4-Distribution/6-Violin Plot.Rmd", sep = ""))
+        }
+    })
+    output$CircleTimeline_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/11-Circle timeline.Rmd", sep = ""))
+        }
+    })
+    output$PairedColumn_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/6-Magnitude/3-Paired column.Rmd", sep = ""))
+        }
+    })
+    output$PairedBar_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/6-Magnitude/4-Paired bar.Rmd", sep = ""))
+        }
+    }) 
+    output$Pyramid_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/4-Distribution/7-Population pyramid.Rmd", sep = ""))
+        }
+    })
+    output$Streamgraph_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/14-Streamgraph.Rmd", sep = ""))
+        }
+    })
+    output$Marimekko_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/7-Part-to-whole/2-Marimekko.Rmd", sep = ""))
+        }
+    })
+    output$Marimekko_bis_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/7-Part-to-whole/2-Marimekko.Rmd", sep = ""))
+        }
+    })
+    output$StackedColumnBar_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/7-Part-to-whole/1-Stacked column bar.Rmd", sep = ""))
+        }
+    })
+    output$DotStripPlot_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/4-Distribution/3-Dot strip plot.Rmd", sep = ""))
+        }
+    })
+    output$DotStripPlot_bis_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/4-Distribution/3-Dot strip plot.Rmd", sep = ""))
+        }
+    })
+    output$Barcode_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/4-Distribution/4-Barcode plot.Rmd", sep = ""))
+        }
+    })
+    output$ConnectedScatterplot_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/8-Connected scatterplot.Rmd", sep = ""))
+        }
+    })
+    output$AreaChart_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/5-Area chart.Rmd", sep = ""))
+        }
+    })
+    output$Slope_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/4-Slope.Rmd", sep = ""))
+        }
+    })
+    output$Candlestick_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/5-Change over time/6-Candlestick.Rmd", sep = ""))
+        }
+    })
+    output$Isotype_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/6-Magnitude/7-Isotype.Rmd", sep = ""))
+        }
+    })
+    output$ColumnLineTimeline_Rmd <- renderUI({
+        if (input$Display) {
+            includeMarkdown(path = paste(path_dossier_projet, "/Notebooks/2-Correlation/2-Column + line Timeline.Rmd", sep = ""))
+        }
     })
     
-    output$Line <- renderUI({
-        vl <- alt$Chart(donnees_line)$
-            encode(
-                x = "journee_gaziere:T",
-                y = "quantite_injectee:Q"
-            )$
-            mark_line(color = input$color_line)$
-            properties(
-                title = input$titre_line)
-        
-        HTML(vegawidget::vw_to_svg(vegawidget(vl, embed = vega_embed(renderer = "svg"))))
-        
-    })
-    
-    output$Scatterplot <- renderVegawidget(scatterplot)
-    
-    output$Bubble <- renderVegawidget(bubble)
-    
-    output$Heatmap <- renderVegawidget(heatmap)
 })
