@@ -1,7 +1,7 @@
 ---
 title: "Histogramme"
 output: html_notebook
-runtime: shiny
+runtime : shiny
 ---
 
 La représentation standard d'une distribution statistique.
@@ -47,15 +47,9 @@ On les transforment un peu pour les rendre compatible avec Vega-Lite.
 donnees_histogramme <- data.frame(Ensemble = as.integer(gsub(" ", "", donnees$Ensemble, fixed = TRUE)), Age_revolu = donnees$`Âge révolu`)
 ```
 
-On les sauvegarde pour utilisation ultérieure.
-```{r echo=TRUE}
-filename <- paste(dirname(dirname(dirname(rstudioapi::getSourceEditorContext()$path))),"/Data/Histogram.Rdata", sep = "")
-save(donnees_histogramme, file = filename)
-```
-
 On construit ensuite l'objet vegalite ...
 ```{r echo=TRUE}
-vl <- alt$
+histogram <- alt$
         Chart(donnees_histogramme)$
         mark_bar()$
         encode(
@@ -73,11 +67,11 @@ vl <- alt$
 
 ... et on peut afficher le graphique ...
 ```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
-vl
+histogram
 ```
 
 ... ou obtenir le schéma JSON correspondant.
 
 ```{r echo=TRUE}
-vl$to_json()
+cat(histogram$to_json())
 ```

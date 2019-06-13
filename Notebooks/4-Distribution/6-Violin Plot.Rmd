@@ -20,7 +20,6 @@ data <- vega_data$cars() %>% filter(Miles_per_Gallon > 0)
 ```
 
 ```{r}
-
 alt$Chart(data)$
   transform_bin(c('binned'), field='Miles_per_Gallon', bin=alt$Bin(maxbins=20))$
   transform_aggregate(value_count='count()', groupby=c('Origin', 'binned'))$
@@ -41,5 +40,4 @@ alt$Chart(data)$
     spacing=0)$
   configure_view(
     stroke=NULL)
-
 ```

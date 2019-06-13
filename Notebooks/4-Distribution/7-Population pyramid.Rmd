@@ -11,7 +11,6 @@ La représentation standard de la ventilation par âge et par sexe de la populat
 require(XML) # Permet de parser les fichiers XML
 require(httr) # Permet de faire des requetes http
 require(altair) # Permet d'utiliser Vega-Lite
-#install_altair(pip = T)
 ```
 
 On importe les données
@@ -65,7 +64,7 @@ On construit ensuite l'objet vegalite ...
 #D'abord la partie de gauche ...
 
 left <-alt$Chart(donnees_finales)$encode(
-  y=alt$Y('Age:N', axis=None),
+  y=alt$Y('Age:N', axis=NULL),
   x=alt$X('Femmes:Q',
           title='population 2018',
           sort=alt$SortOrder('descending')),
@@ -75,16 +74,19 @@ left <-alt$Chart(donnees_finales)$encode(
 # ... puis la partie du centre ...
 
 middle <- alt$Chart(donnees_finales)$encode(
-  y=alt$Y('Age:N', axis=None,
+  y=alt$Y('Age:N',
+          axis=NULL,
           sort=alt$SortOrder('descending')),
-  text=alt$Text('Age:N'),
-)$mark_text()$properties(width=50,title="Population pyramid")
+  text=alt$Text('Age:N')
+)$
+  mark_text()$
+  properties(width=50,title="Population pyramid")
 
 #... et enfin la partie de droite.
 
 right <- alt$Chart(donnees_finales)$encode(
-  y=alt$Y('Age:N', axis=None),
-  x=alt.X('Hommes:Q', title='population 2018'),
+  y=alt$Y('Age:N', axis=NULL),
+  x=alt$X('Hommes:Q', title='population 2018'),
   tooltip=c("Age","Hommes")
 )$mark_bar()$properties(title='Hommes')
 

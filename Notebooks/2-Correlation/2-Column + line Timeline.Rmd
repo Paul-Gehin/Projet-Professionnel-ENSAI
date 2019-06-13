@@ -7,10 +7,9 @@ runtime: shiny
 Un bon moyen de montrer la relation entre une quantité (colonnes) et un taux (ligne).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-require(xlsx) # Permet de lire des fichier xls
+require(XML) # Permet de lire des fichier html
 require(httr) # Permet de faire des requêtes http
 require(altair) # Permet d'utiliser Vega-Lite
-#install_altair(pip = T)
 ```
 
 On importe les données
@@ -40,29 +39,52 @@ On construit ensuite l'objet vegalite ...
 point <- alt$Chart(donnees_finales)$mark_point()$encode(
   y=alt$Y('nb_femmes:Q'),
   x=alt$X('Age_revolu:Q'),
-  color=alt$Color('FEM:N', legend=alt$Legend(title="Efectifs hommes/femmes"),scale=alt$Scale(
-    domain=c('Femmes','Hommes'),
-    range=c('red','green'))),
+  color=alt$Color('femme:N',
+                  legend=alt$Legend(title="Efectifs hommes/femmes"),
+                  scale=alt$Scale(
+                    domain=c('Femmes','Hommes'),
+                    range=c('red','green')
+                  )
+                 ),
   tooltip = c("Age_revolu:Q","nb_femmes:Q")
 )
+```
 
-point2 <- alt$Chart(donnees_finales)$mark_point()$encode(
-  y=alt$Y('nb_hommes:Q'),
-  x=alt$X('Age_revolu:Q'),
-  color=alt$Color('HOM:N',scale=alt$Scale(
-    domain=c('Hommes'),
-    range=c('green'))),
+```{r echo=TRUE}
+point2 <- alt$
+  Chart(donnees_finales)$
+  mark_point()$encode(
+    y=alt$Y('nb_hommes:Q'),
+    x=alt$X('Age_revolu:Q'),
+    color=alt$Color(
+      'homme:N',
+      scale=alt$Scale(
+        domain=c('Hommes', 'Femmes'),
+        range=c('green', 'red')
+      )
+    ),
   tooltip = c("Age_revolu:Q","nb_hommes:Q")
 )
+```
 
-bar <- alt$Chart(donnees_finales)$mark_bar()$encode(
-  x=alt$X('Age_revolu:Q', axis=alt$Axis(title="Age"),
-          bin = alt$Bin(maxbins = 20)),
-  y=alt$Y('Ensemble:Q', axis=alt$Axis(title="Population totale en 2018")),
-  tooltip = c("Age_revolu:Q","Ensemble:Q"),
+```{r echo=TRUE}
+bar <- alt$
+  Chart(donnees_finales)$
+  mark_bar()$
+  encode(
+    x = alt$X('Age_revolu:Q',
+              axis = alt$Axis(title="Age"),
+              bin = alt$Bin(maxbins = 20)
+             ),
+    y = alt$Y('Ensemble:Q',
+              axis = alt$Axis(title="Population totale en 2018")
+             ),
+    tooltip = c("Age_revolu:Q","Ensemble:Q")
 )
+```
 
-chart<-bar+point+point2$properties(title="Column + line timeline")
+```{r echo=TRUE}
+chart <- (bar + point + point2)$properties(title="Column + line timeline")
 ```
 
 
